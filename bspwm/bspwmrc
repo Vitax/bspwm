@@ -3,6 +3,12 @@
 ## source color scheme
 # . $HOME/.cache/themes/dark_world/dark/colors.sh
 
+$HOME/src/bspwm/panel/panel &
+
+## global variables
+# calculate the padding top based on the intial gap
+PADDING_TOP=$(( $PANEL_HEIGHT + $PANEL_VERTICAL_OFFSET ))
+
 ## set colors
 # bspc config normal_border_color $COLOR1
 # bspc config focused_border_color $COLOR15
@@ -27,7 +33,7 @@ fi
 
 bspc config border_width         0
 bspc config window_gap           16
-
+bspc config top_padding          $PADDING_TOP
 bspc config split_ratio          0.54
 bspc config single_monocle       true
 bspc config borderless_monocle   true

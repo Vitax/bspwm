@@ -1,20 +1,39 @@
 #! /usr/bin/env sh
 
+# Just to make sure there is no double process
+killall -9 lemonbar xtitle xdo datetime
+
 ## include color scheme
 . $HOME/.cache/themes/dark_world/dark/colors.sh
 
-if xdo id -a "$PANEL_WM_NAME" > /dev/null ; then
-	printf "%s\n" "The panel is already running." >&2
-	exit 1
-fi
+## include modules
+. $HOME/src/bspwm/panel/modules/datetime
+. $HOME/src/bspwm/panel/modules/xtitle
+. $HOME/src/bspwm/panel/modules/bspwm
 
-trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+# setup global variables
+FONT="xft:xos4\ Terminus:size=12"
+ICON_FONT="xft:ShureTechMono\ Nerd\ Font:size=12"
+
+WIDTH=1920
+
+PANEL_HORIZONTAL_OFFSET=250
+PANEL_VERTICAL_OFFSET=$(( $(bspc config window_gap) / 2 ))
+
+PANEL_HEIGHT=28
+PANEL_WIDTH=$(( $WIDTH - $(( 2 * $PANEL_HORIZONTAL_OFFSET )) ))
+
+PANEL_WM_NAME=bspwm_panel
+PANEL_FIFO=/tmp/panel-fifo
+
+export PANEL_HEIGHT PANEL_VERTICAL_OFFSET
 
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
 
-xtitle -sf 'T%s\n' > "$PANEL_FIFO" &
-date +'S(%a) %Y/%m/%m %H:%M' > "$PANEL_FIFO" &
+get_datetime > "$PANEL_FIFO" &
+get_title > "$PANEL_FIFO" &
+
 bspc subscribe report > "$PANEL_FIFO" &
 
 num_mon=$(bspc query -M | wc -l)
@@ -35,109 +54,21 @@ statusline() {
                 wm=
                 IFS=':'
                 set -- ${line#?}
-                while [ $# -gt 0 ] ; do
-                    item=$1
-                    name=${item#?}
-                    case $item in
-                        [mM]*)
-                            case $item in
-                                m*)
-                                    # monitor
-                                    FG=$COLOR7
-                                    BG=$BACKGROUND
-                                    on_focused_monitor=
-                                    ;;
-                                M*)
-                                    # focused monitor
-                                    FG=$COLOR15
-                                    BG=$COLOR5
-                                    on_focused_monitor=1
-                                    ;;
-                            esac
-                            [ $num_mon -lt 2 ] && shift && continue
-                            wm="${wm}%{F${FG}}%{B${BG}}%{A:bspc monitor -f ${name}:} ${name} %{A}%{B-}%{F-}"
-                            ;;
-                        [fFoOuU]*)
-                            case $item in
-                                f*)
-                                    # free desktop
-                                    FG=$FOREGROUND
-                                    BG=$BACKGROUND
-                                    UL=$BG
-                                    ;;
-                                F*)
-                                    if [ "$on_focused_monitor" ] ; then
-                                        # focused free desktop
-                                        FG=$BACKGROUND
-                                        BG=$COLOR6
-                                        UL=$BG
-                                    else
-                                        # active free desktop
-                                        FG=$FOREGROUND
-                                        BG=$BACKGROUND
-                                        UL=$COLOR6
-                                    fi
-                                    ;;
-                                o*)
-                                    # occupied desktop
-                                    FG=$FOREGROUND
-                                    BG=$BACKGROUND
-                                    UL=$FOREGROUND
-                                    ;;
-                                O*)
-                                    if [ "$on_focused_monitor" ] ; then
-                                        # focused occupied desktop
-                                        FG=$BACKGROUND
-                                        BG=$FOREGROUND
-                                        UL=$BG
-                                    else
-                                        # active occupied desktop
-                                        FG=$FOREGROUND
-                                        BG=$BACKGROUND
-                                        UL=$FOREGROUND
-                                    fi
-                                    ;;
-                                u*)
-                                    # urgent desktop
-                                    FG=$COLOR2
-                                    BG=$BACKGROUND
-                                    UL=$BG
-                                    ;;
-                                U*)
-                                    if [ "$on_focused_monitor" ] ; then
-                                        # focused urgent desktop
-                                        FG=$BACKGROUND
-                                        BG=$COLOR10
-                                        UL=$BG
-                                    else
-                                        # active urgent desktop
-                                        FG=$COLOR2
-                                        BG=$BACKGROUND
-                                        UL=$COLOR10
-                                    fi
-                                    ;;
-                            esac
-                            wm="${wm}%{F${FG}}%{B${BG}}%{U${UL}}%{+u}%{A:bspc desktop -f ${name}:} ${name} %{A}%{B-}%{F-}%{-u}"
-                            ;;
-                        [LTG]*)
-                            # layout, state and flags
-                            wm="${wm}%{F$FOREGROUND}%{B$BACKGROUND} ${name} %{B-}%{F-}"
-                            ;;
-                    esac
-                    shift
-                done
+                wm=$(get_bspwm_state $line)
                 ;;
         esac
 
-        printf "%s\n" "%{l}${wm} %{c}${title} %{r}${sys}"
+        printf "%s\n" "%{l}${wm}%{c}${title}%{r}${sys}"
     done
 }
 
-statusline < "$PANEL_FIFO" | lemonbar -a 32 -u 3 \
-    -g  x$PANEL_HEIGHT \
-    -f "$PANEL_FONT" \
-    -f "$PANEL_ICON_FONT" \
-    -F "$FOREGROUND" -B "$BACKGROUND" | dash
+statusline < "$PANEL_FIFO" | lemonbar -a 32 -u 2 \
+        -g "$PANEL_WIDTH"x"$PANEL_HEIGHT"+"$PANEL_HORIZONTAL_OFFSET"+"$PANEL_VERTICAL_OFFSET" \
+        -n "$PANEL_WM_NAME"  \
+        -o 3 -f "$FONT" -o 3 -f "$ICON_FONT" \
+        -F "$FOREGROUND" -B "$BACKGROUND" | dash &
+
+sleep 1
 
 wid=$(xdo id -m -a "$PANEL_WM_NAME")
 xdo above -t "$(xdo id -N Bspwm -n root | sort | head -n 1)" "$wid"

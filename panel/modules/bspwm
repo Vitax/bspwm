@@ -1,0 +1,95 @@
+#! /usr/bin/env sh
+
+get_bspwm_state() {
+    while [ $# -gt 0 ] ; do
+        item=$1
+        name=${item#?}
+        case $item in
+            [mM]*)
+                case $item in
+                    m*)
+                        # monitor
+                        FG=$COLOR7
+                        BG=$BACKGROUND
+                        on_focused_monitor=
+                        ;;
+                    M*)
+                        # focused monitor
+                        FG=$COLOR15
+                        BG=$COLOR5
+                        on_focused_monitor=1
+                        ;;
+                esac
+                [ $num_mon -lt 2 ] && shift && continue
+                printf '%s'"${wm}%{F${FG}}%{B${BG}}%{A:bspc monitor -f ${name}:} ${name} %{A}%{B-}%{F-}"
+                ;;
+            [fFoOuU]*)
+                case $item in
+                    f*)
+                        # free desktop
+                        FG=$FOREGROUND
+                        BG=$BACKGROUND
+                        UL=$BG
+                        ;;
+                    F*)
+                        if [ "$on_focused_monitor" ] ; then
+                            # focused free desktop
+                            FG=$BACKGROUND
+                            BG=$COLOR6
+                            UL=$BG
+                        else
+                            # active free desktop
+                            FG=$FOREGROUND
+                            BG=$COLOR6
+                            UL=$COLOR6
+                        fi
+                        ;;
+                    o*)
+                        # occupied desktop
+                        FG=$FOREGROUND
+                        BG=$BACKGROUND
+                        UL=$FOREGROUND
+                        ;;
+                    O*)
+                        if [ "$on_focused_monitor" ] ; then
+                            # focused occupied desktop
+                            FG=$BACKGROUND
+                            BG=$FOREGROUND
+                            UL=$BG
+                        else
+                            # active occupied desktop
+                            FG=$FOREGROUND
+                            BG=$BACKGROUND
+                            UL=$FOREGROUND
+                        fi
+                        ;;
+                    u*)
+                        # urgent desktop
+                        FG=$COLOR2
+                        BG=$BACKGROUND
+                        UL=$BG
+                        ;;
+                    U*)
+                        if [ "$on_focused_monitor" ] ; then
+                            # focused urgent desktop
+                            FG=$BACKGROUND
+                            BG=$COLOR10
+                            UL=$BG
+                        else
+                            # active urgent desktop
+                            FG=$COLOR2
+                            BG=$COLOR10
+                            UL=$COLOR10
+                        fi
+                        ;;
+                esac
+                printf '%s' "${wm}%{F${FG}}%{B${BG}}%{U${UL}}%{+u}%{A:bspc desktop -f ${name}:} ${name} %{A}%{B-}%{F-}%{-u}"
+                ;;
+            [LTG]*)
+                # layout, state and flags
+                printf '%s' "${wm}%{F$FOREGROUND}%{B$BACKGROUND} ${name} %{B-}%{F-}"
+                ;;
+        esac
+        shift
+    done
+}

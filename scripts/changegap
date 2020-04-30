@@ -2,35 +2,35 @@
 
 WINDOW_GAP=$(bspc config window_gap)
 
+MAX_GAP_CAP=40
+
 usage() {
     >&1 printf '%s \n' 'usage: changegap [-i] [-d] [-s] value' ;
     exit 1
 }
 
 inc() {
-    if [ -z $2 ]; then
-        usage 
+    NEW_GAP=$(( $WINDOW_GAP + $1 ))
+    if [ $NEW_GAP -gt $MAX_GAP_CAP ]; then
+        exit 0
     else
-        NEW_GAP=$(( $WINDOW_GAP + $2 ))
         bspc config window_gap $NEW_GAP
     fi
+
 }
 
 dec() {
-    if [ -z $2 ]; then
-        usage
+    NEW_GAP=$(( $WINDOW_GAP + $1 ))
+    if [ $NEW_GAP -lt 0 ]; then
+            exit 0
     else
-        NEW_GAP=$(( $WINDOW_GAP - $2 ))
+        NEW_GAP=$(( $WINDOW_GAP - $1 ))
         bspc config window_gap $NEW_GAP
     fi
 }
 
 _set() {
-    if [ -z $2 ]; then
-        usage
-    else
-        bspc config window_gap $2
-    fi
+    bspc config window_gap $1
 }
 
 case "$1" in

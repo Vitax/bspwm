@@ -1,0 +1,8 @@
+# !/usr/bin/env sh
+
+get_datetime() {
+    while true; do
+        date +'S%a %Y-%d-%m  %H:%M'
+        sleep 30
+    done
+}
