@@ -1,0 +1,42 @@
+#! /usr/bin/env sh
+
+WINDOW_GAP=$(bspc config window_gap)
+
+usage() {
+    >&1 printf '%s \n' 'usage: changegap [-i] [-d] [-s] value' ;
+    exit 1
+}
+
+inc() {
+    if [ -z $2 ]; then
+        usage 
+    else
+        NEW_GAP=$(( $WINDOW_GAP + $2 ))
+        bspc config window_gap $NEW_GAP
+    fi
+}
+
+dec() {
+    if [ -z $2 ]; then
+        usage
+    else
+        NEW_GAP=$(( $WINDOW_GAP - $2 ))
+        bspc config window_gap $NEW_GAP
+    fi
+}
+
+_set() {
+    if [ -z $2 ]; then
+        usage
+    else
+        bspc config window_gap $2
+    fi
+}
+
+case "$1" in
+    inc|-i) inc "$2" ;;
+    dec|-d) dec "$2" ;;
+    set|-s) _set "$2" ;;
+    -h) usage ;;
+esac
+    
