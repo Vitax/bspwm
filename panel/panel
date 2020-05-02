@@ -12,31 +12,24 @@ killall -9 lemonbar xtitle xdo datetime
 . $HOME/src/bspwm/panel/modules/bspwm
 
 # setup global variables
-FONT="xft:xos4\ Terminus:size=12"
-ICON_FONT="xft:ShureTechMono\ Nerd\ Font:size=12"
+FONT="Hermit:style=regular:size=11"
+ICON_FONT="ShureTechMono Nerd Font:size=11"
 
-WIDTH=1920
-
-PANEL_HORIZONTAL_OFFSET=250
-PANEL_VERTICAL_OFFSET=$(( $(bspc config window_gap) / 2 ))
-
-PANEL_HEIGHT=28
-PANEL_WIDTH=$(( $WIDTH - $(( 2 * $PANEL_HORIZONTAL_OFFSET )) ))
-
+## lemonbar variables
+. $HOME/src/bspwm/panel/panel_one
 PANEL_WM_NAME=bspwm_panel
 PANEL_FIFO=/tmp/panel-fifo
-
-export PANEL_HEIGHT PANEL_VERTICAL_OFFSET
 
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
 
 get_datetime > "$PANEL_FIFO" &
+# get_volume > "$PANEL_FIFO" &
+# get_battery > "$PANEL_FIFO" &
+# get_backlight > "$PANEL_FIFO" &
 get_title > "$PANEL_FIFO" &
 
 bspc subscribe report > "$PANEL_FIFO" &
-
-num_mon=$(bspc query -M | wc -l)
 
 statusline() {
     while read -r line ; do
@@ -58,14 +51,14 @@ statusline() {
                 ;;
         esac
 
-        printf "%s\n" "%{l}${wm}%{c}${title}%{r}${sys}"
+        printf "%s\n" "%{l} ${wm}%{c}${title}%{r}${sys} "
     done
 }
 
 statusline < "$PANEL_FIFO" | lemonbar -a 32 -u 2 \
-        -g "$PANEL_WIDTH"x"$PANEL_HEIGHT"+"$PANEL_HORIZONTAL_OFFSET"+"$PANEL_VERTICAL_OFFSET" \
+    -g "$PANEL_WIDTH"x"$PANEL_HEIGHT"+"$X_OFFSET"+"$Y_OFFSET" \
         -n "$PANEL_WM_NAME"  \
-        -o 3 -f "$FONT" -o 3 -f "$ICON_FONT" \
+        -o 2 -f "$FONT" -o 2 -f "$ICON_FONT" \
         -F "$FOREGROUND" -B "$BACKGROUND" | dash &
 
 sleep 1
