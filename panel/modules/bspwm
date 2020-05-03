@@ -22,8 +22,6 @@ get_bspwm_state() {
                         on_focused_monitor=1
                         ;;
                 esac
-                [ $num_mon -lt 2 ] && shift && continue
-                printf '%s'"${wm}%{F${FG}}%{B${BG}}%{A:bspc monitor -f ${name}:} ${name} %{A}%{B-}%{F-}"
                 ;;
             [fFoOuU]*)
                 case $item in
@@ -87,7 +85,7 @@ get_bspwm_state() {
                 esac
                 printf '%s' "${wm}%{F${FG}}%{B${BG}}%{U${UL}}%{+u}%{A:bspc desktop -f ${name}:} ${name} %{A}%{B-}%{F-}%{-u}"
                 ;;
-            [LTG]*)
+            [LG]*)
                 # layout, state and flags
                 printf '%s' "${wm}%{F$FOREGROUND}%{B$BACKGROUND} ${name} %{B-}%{F-}"
                 ;;

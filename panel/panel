@@ -4,24 +4,24 @@
 killall -9 lemonbar xtitle xdo datetime
 
 ## include color scheme
-. $HOME/.cache/themes/dark_world/dark/colors.sh
-
-## include modules
-. $HOME/src/bspwm/panel/modules/datetime
-. $HOME/src/bspwm/panel/modules/xtitle
-. $HOME/src/bspwm/panel/modules/bspwm
-
+. $HOME/.cache/themes/light_world/colors.sh
 # setup global variables
 FONT="Hermit:style=regular:size=11"
 ICON_FONT="ShureTechMono Nerd Font:size=11"
 
 ## lemonbar variables
-. $HOME/src/bspwm/panel/panel_one
 PANEL_WM_NAME=bspwm_panel
 PANEL_FIFO=/tmp/panel-fifo
 
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
+
+## include modules
+. $HOME/src/bspwm/panel/modules/datetime
+. $HOME/src/bspwm/panel/modules/xtitle
+. $HOME/src/bspwm/panel/modules/bspwm
+# . $HOME/src/bspwm/panel/modules/battery
+
 
 get_datetime > "$PANEL_FIFO" &
 # get_volume > "$PANEL_FIFO" &
@@ -51,19 +51,24 @@ statusline() {
                 ;;
         esac
 
-        printf "%s\n" "%{l} ${wm}%{c}${title}%{r}${sys} "
+        layout="%{l}${wm}%{c}${title}%{r}${sys}"
+
+        if [ "$(bspc query -M | wc -l)" -gt 1 ]; then
+            printf '%s%s\n' "%{S0}$layout" "%{S1}$layout"
+        else
+            printf '%s\n' "%{S0}$layout"
+        fi
     done
 }
 
-statusline < "$PANEL_FIFO" | lemonbar -a 32 -u 2 \
-    -g "$PANEL_WIDTH"x"$PANEL_HEIGHT"+"$X_OFFSET"+"$Y_OFFSET" \
+statusline < "$PANEL_FIFO" | lemonbar -a 32 -b \
+        -g x"$PANEL_HEIGHT" \
         -n "$PANEL_WM_NAME"  \
         -o 2 -f "$FONT" -o 2 -f "$ICON_FONT" \
-        -F "$FOREGROUND" -B "$BACKGROUND" | dash &
+        -F "$FOREGROUND" -B "$BACKGROUND" | sh &
 
-sleep 1
+until wid=$(xdo id -m -a "$PANEL_WM_NAME"); do
+    sleep 0.1
+done
 
-wid=$(xdo id -m -a "$PANEL_WM_NAME")
-xdo above -t "$(xdo id -N Bspwm -n root | sort | head -n 1)" "$wid"
-
-wait
+xdo above -t "$(xdo id -N Bspwm -n root | sort | head -n 1)" "$wid" &

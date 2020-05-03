@@ -1,1 +1,39 @@
 # !/usr/bin/env sh
+
+get_battery() {
+    command -v acpi > /dev/null || return 1
+
+    local label command status output
+
+    label='B:'
+    # Using Bash parameter expansion here.  Just experimenting…
+    command="$(acpi -b)"
+    status="${command#*: }"    # Delete up the colon and following space
+    status="${status:0:1}"     # Use first character
+    output="${command#*, }"    # Delete up to first comma
+    output="${output%,*}"      # Same but read from the end
+
+    # The $battery_status will tell us if it is (C)harging or
+    # (D)ischaging.  If dischange level reaches 0-9, the whole indicator
+    # will turn to a bright colour.  Otherwise, discharging will be
+    # denoted by a coloured output of the current level followed by the
+    # minus sign.
+    case $status in
+        'C')
+            "$output"
+            ;;
+        'D')
+            case "${output%?}" in
+                [0-9])
+                    "$label $output"
+                    ;;
+                *)
+                    "$label $output"
+                    ;;
+            esac
+            ;;
+        *)
+            "$label $output"
+            ;;
+    esac
+}

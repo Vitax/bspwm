@@ -19,7 +19,6 @@ bspc wm --adopt-orphans
 # bspc rule -a Kupfer.py focus=on
 # bspc rule -a Screenkey manage=off
 
-
 bspc rule -a 'Zathura' state=tiled
 bspc rule -a 'Plank' borders=off
 bspc rule -a 'Nemo' state=floating
