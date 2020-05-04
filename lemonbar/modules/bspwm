@@ -83,12 +83,19 @@ get_bspwm_state() {
                         fi
                         ;;
                 esac
-                printf '%s' "${wm}%{F${FG}}%{B${BG}}%{U${UL}}%{+u}%{A:bspc desktop -f ${name}:} ${name} %{A}%{B-}%{F-}%{-u}"
+                printf '%s' "%{F${FG}}%{B${BG}}%{U${UL}}%{+u}%{A:bspc desktop -f ${name}:} ${name} %{A}%{B-}%{F-}%{-u}"
                 ;;
             [LG]*)
-                # layout, state and flags
-                printf '%s' "${wm}%{F$FOREGROUND}%{B$BACKGROUND} ${name} %{B-}%{F-}"
-                ;;
+                case $name in
+                    T*)
+                        # layout, state and flags
+                        printf '%s' "%{F$FOREGROUND}%{B$BACKGROUND} Tile %{B-}%{F-}"
+                        ;;
+                    M*)
+                        # layout, state and flags
+                        printf '%s' "%{F$FOREGROUND}%{B$BACKGROUND} Monocle %{B-}%{F-}"
+                        ;;
+                esac
         esac
         shift
     done

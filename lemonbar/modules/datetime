@@ -1,0 +1,5 @@
+#! /usr/bin/env sh
+
+get_datetime() {
+    printf 'D%s\n' "$(date +'(%a) %Y-%d-%m  %H:%M')"
+}

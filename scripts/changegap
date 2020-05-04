@@ -20,14 +20,13 @@ inc() {
 }
 
 dec() {
-    NEW_GAP=$(( $WINDOW_GAP + $1 ))
+    NEW_GAP=$(( $WINDOW_GAP - $1 ))
     if [ $NEW_GAP -eq 0 ]; then
         exit 0
-    elif [ $NEW_GAP -lt 0 ]; then
-        bspc config window_gap 0
+    elif [ $NEW_GAP -lt 1 ]; then
+        bspc config window_gap $NEW_GAP
         exit 0
     else
-        NEW_GAP=$(( $WINDOW_GAP - $1 ))
         bspc config window_gap $NEW_GAP
     fi
 }

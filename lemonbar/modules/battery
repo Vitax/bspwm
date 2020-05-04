@@ -1,0 +1,43 @@
+#! /usr/bin/env sh
+
+get_emoji() {
+    if [ $1 -gt 80 ] ; then
+        emoji=' '
+    elif [ $1 -gt 60 ] ; then
+        emoji=' '
+    elif [ $1 -gt 35 ] ; then
+        emoji=' '
+    elif [ $1 -gt 10 ] ; then
+        emoji=' '
+    else
+        emoji=' '
+    fi
+
+    printf "%s" "$emoji"
+}
+
+get_battery() {
+     acpi --battery 0 | \
+     while read -r line; do
+        set -- $line
+        ac_state=$(printf "%s" $3 | sed 's/[,]//g')
+        bat_val=$(printf "%s" $4 | sed 's/[%,]//g')
+        bat_time=$(printf "%s" $5 | sed 's@\(..\):\(..\):\(..\)@\1:\2@')
+
+        case $ac_state in
+            "Charging") 
+                emoji='' ;;
+            "Discharging")
+                emoji=$(get_emoji $bat_val);;
+            "Not")
+                bat_val=$(printf "%s" $5 | sed 's/[%,]//g')
+                emoji=$(get_emoji $bat_val) ;;
+        esac
+
+        if [ $ac_state = "Not" ]; then
+            printf "B%s %s%%\n" "$emoji" "$bat_val"
+        else
+            printf "B%s %s%% %s\n" "$emoji" "$bat_val" "$bat_time"
+        fi
+    done
+}

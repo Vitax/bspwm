@@ -1,0 +1,5 @@
+#! /usr/bin/env sh
+
+get_title() {
+    printf 'T%s\n' "$(xtitle -t 50)"
+}

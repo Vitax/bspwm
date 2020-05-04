@@ -1,5 +1,0 @@
-# !/usr/bin/env sh
-
-get_title() {
-    xtitle -t 70 -sf 'T%s\n'
-}
