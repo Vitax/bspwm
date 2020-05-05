@@ -1,10 +1,9 @@
 #! /usr/bin/env sh
 
 ## kill processes
-while pgrep -u $UID -x lemonbar >/dev/null; do sleep 1; done
-while pgrep -u $UID -x panel >/dev/null; do sleep 1; done
-# while pgrep -u $UID -x xtitle >/dev/null; do sleep 1; done
-while pgrep -u $UID -x xdo >/dev/null; do sleep 1; done
+killall -9 lemonbar
+killall -9 xdo
+killall -9 xtitle
 
 ## include color scheme
 . $HOME/.cache/themes/light_world/colors.sh
@@ -14,7 +13,6 @@ while pgrep -u $UID -x xdo >/dev/null; do sleep 1; done
 
 ## include modules
 . $HOME/src/bspwm/lemonbar/modules/datetime
-# . $HOME/src/bspwm/lemonbar/modules/xtitle
 . $HOME/src/bspwm/lemonbar/modules/bspwm
 . $HOME/src/bspwm/lemonbar/modules/battery
 . $HOME/src/bspwm/lemonbar/modules/volume
@@ -26,7 +24,6 @@ mkfifo "$PANEL_FIFO"
 
 get_battery > "$PANEL_FIFO" &
 get_datetime > "$PANEL_FIFO" &
-# get_title > "$PANEL_FIFO" &
 get_volume > "$PANEL_FIFO" &
 bspc subscribe report > "$PANEL_FIFO" &
 
@@ -39,9 +36,6 @@ statusline() {
             D*)
                 datetime="%{F$FOREGROUND}%{B$BACKGROUND} ${line#?} %{B-}%{F-}"
                 ;;
-            # T*)
-            #     title="%{F$FOREGROUND}%{B$BACKGROUND} ${line#?} %{B-}%{F-}"
-            #     ;;
             V*)
                 volume="%{F$FOREGROUND}%{B$BACKGROUND} ${line#?} %{B-}%{F-}"
               ;;
@@ -53,8 +47,8 @@ statusline() {
                 ;;
         esac
 
-        main_screen="%{l}${wm}%{c}${datetime}%{r} ${volume} ${battery}"
-        off_screen="%{l}${wm}%{c}${datetime}%{r}"
+        main_screen="%{l}${wm}%{c}${datetime}%{r} ${volume} ${battery} "
+        off_screen="%{l}${wm}%{c}${datetime}%{r} "
 
         if [ "$(bspc query -M | wc -l)" -gt 1 ]; then
             printf '%s %s\n' "%{S0}$off_screen" "%{S1}$main_screen"
@@ -67,8 +61,7 @@ statusline() {
 statusline < "$PANEL_FIFO" | lemonbar -a 10 -b -p \
         -g x"$PANEL_HEIGHT" \
         -n "$PANEL_WM_NAME"  \
-        -f "$FONT" -o 2 \
-        -f "$ICON_FONT" -o -2 \
+        -f "$FONT" \
         -F "$FOREGROUND" -B "$BACKGROUND" | dash &
 
 until wid=$(xdo id -m -a "$PANEL_WM_NAME"); do

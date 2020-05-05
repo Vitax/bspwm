@@ -6,9 +6,9 @@ get_volume() {
         vol=$(volume)
 
         if $muted = true; then
-            printf 'V%s\n' " muted"
+            printf 'V%s\n' "ﱝ MUTED"
         else
-            printf 'V%s%%\n' " $vol"
+            printf 'V%s%%\n' "墳 $vol"
         fi
         sleep 1
     done

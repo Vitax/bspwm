@@ -2,15 +2,15 @@
 
 get_emoji() {
     if [ $1 -gt 80 ] ; then
-        emoji=' '
+        emoji=''
     elif [ $1 -gt 60 ] ; then
-        emoji=' '
+        emoji=''
     elif [ $1 -gt 35 ] ; then
-        emoji=' '
+        emoji=''
     elif [ $1 -gt 10 ] ; then
-        emoji=' '
+        emoji=''
     else
-        emoji=' '
+        emoji=''
     fi
 
     printf "%s" "$emoji"

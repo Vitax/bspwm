@@ -1,12 +1,12 @@
 # setup global variables
-FONT="Hermit:style=regular:size=11:antialias=true"
-ICON_FONT="ShureTechMono Nerd Font:size=11:antialias=true"
+# FONT="Hermit:size=11"
+FONT="ShureTechMono\ Nerd\ Font\ Mono:size=12"
 
 ## lemonbar variables
 PANEL_WM_NAME=bspwm_panel
 PANEL_FIFO=/tmp/panel-fifo
 
-PANEL_HEIGHT=26
+PANEL_HEIGHT=22
 PANEL_WIDTH=1620
 
 PANEL_X_OFFSET=150
