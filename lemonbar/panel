@@ -1,24 +1,20 @@
 #! /usr/bin/env sh
 
+## kill processes
+while pgrep -u $UID -x lemonbar >/dev/null; do sleep 1; done
+while pgrep -u $UID -x panel >/dev/null; do sleep 1; done
+# while pgrep -u $UID -x xtitle >/dev/null; do sleep 1; done
+while pgrep -u $UID -x xdo >/dev/null; do sleep 1; done
+
 ## include color scheme
 . $HOME/.cache/themes/light_world/colors.sh
-. $HOME/src/bspwm/lemonbar/panel_options
-
-## Just to make sure there is no double process
-pkill -9 -f xtitle
-pkill -9 -f xdo
-
-# setup global variables
-FONT="Hermit:style=regular:size=11:antialias=true"
-ICON_FONT="ShureTechMono Nerd Font:size=11:antialias=true"
 
 ## lemonbar variables
-PANEL_WM_NAME=bspwm_panel
-PANEL_FIFO=/tmp/panel-fifo
+. $HOME/src/bspwm/lemonbar/panel_options
 
 ## include modules
 . $HOME/src/bspwm/lemonbar/modules/datetime
-. $HOME/src/bspwm/lemonbar/modules/xtitle
+# . $HOME/src/bspwm/lemonbar/modules/xtitle
 . $HOME/src/bspwm/lemonbar/modules/bspwm
 . $HOME/src/bspwm/lemonbar/modules/battery
 . $HOME/src/bspwm/lemonbar/modules/volume
@@ -28,17 +24,10 @@ PANEL_FIFO=/tmp/panel-fifo
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
 
-modules() {
-    while true; do
-        get_battery 
-        get_datetime
-        get_title 
-        get_volume
-        sleep 0.5
-    done
-}
-
-modules > "$PANEL_FIFO" &
+get_battery > "$PANEL_FIFO" &
+get_datetime > "$PANEL_FIFO" &
+# get_title > "$PANEL_FIFO" &
+get_volume > "$PANEL_FIFO" &
 bspc subscribe report > "$PANEL_FIFO" &
 
 statusline() {
@@ -50,23 +39,22 @@ statusline() {
             D*)
                 datetime="%{F$FOREGROUND}%{B$BACKGROUND} ${line#?} %{B-}%{F-}"
                 ;;
-            T*)
-                title="%{F$FOREGROUND}%{B$BACKGROUND} ${line#?} %{B-}%{F-}"
-                ;;
+            # T*)
+            #     title="%{F$FOREGROUND}%{B$BACKGROUND} ${line#?} %{B-}%{F-}"
+            #     ;;
             V*)
                 volume="%{F$FOREGROUND}%{B$BACKGROUND} ${line#?} %{B-}%{F-}"
               ;;
             W*)
                 # bspwm's state
-                wm=
                 IFS=':'
                 set -- ${line#?}
                 wm=$(get_bspwm_state $line)
                 ;;
         esac
 
-        main_screen="%{l}${wm}%{c}${datetime}%{r}[${title}] ${volume} ${battery}"
-        off_screen="%{l}${wm}%{c}${datetime}%{r}${title}"
+        main_screen="%{l}${wm}%{c}${datetime}%{r} ${volume} ${battery}"
+        off_screen="%{l}${wm}%{c}${datetime}%{r}"
 
         if [ "$(bspc query -M | wc -l)" -gt 1 ]; then
             printf '%s %s\n' "%{S0}$off_screen" "%{S1}$main_screen"
@@ -77,12 +65,14 @@ statusline() {
 }
 
 statusline < "$PANEL_FIFO" | lemonbar -a 10 -b -p \
-        -g "$PANEL_WIDTH"x"$PANEL_HEIGHT"+"$PANEL_X_OFFSET"+"$PANEL_Y_OFFSET" \
+        -g x"$PANEL_HEIGHT" \
         -n "$PANEL_WM_NAME"  \
-        -f "$FONT" -o 2  -f "$ICON_FONT" -o -2 \
-        -F "$FOREGROUND" -B "$BACKGROUND" | sh &
+        -f "$FONT" -o 2 \
+        -f "$ICON_FONT" -o -2 \
+        -F "$FOREGROUND" -B "$BACKGROUND" | dash &
 
-wid=$(xdo id -m -a "$PANEL_WM_NAME")
+until wid=$(xdo id -m -a "$PANEL_WM_NAME"); do
+    sleep 1
+done
+
 xdo below -t $(xdo id -n root) $wid &
-
-wait

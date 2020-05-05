@@ -1,5 +1,8 @@
 #! /usr/bin/env sh
 
 get_title() {
-    printf 'T%s\n' "$(xtitle -t 50)"
+    while true; do
+        printf 'T%s\n' "$(xtitle -t 50)"
+        sleep 1
+    done
 }

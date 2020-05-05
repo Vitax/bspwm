@@ -1,17 +1,11 @@
 #! /usr/bin/env sh
-
-pk -9 -f panel
-pk -9 -f lemonbar
-pk -9 -f bspwmrc
+while pgrep -u $UID -x bspwmrc >/dev/null; do sleep 1; done
 
 ## source color scheme
 . $HOME/.cache/themes/light_world/colors.sh
 
 ## source lemonbar properties
 . $HOME/src/bspwm/lemonbar/panel_options
-
-## launch lemonbar
-$HOME/src/bspwm/lemonbar/panel &
 
 ## global variables
 ## set colors
@@ -37,7 +31,7 @@ else
     bspc monitor eDP1 -d 05 06
 fi
 
-bspc config bottom_padding $(( $PANEL_HEIGHT + $PANEL_Y_OFFSET ))
+bspc config bottom_padding $PANEL_HEIGHT
 
 bspc config border_width         4
 bspc config window_gap           16
